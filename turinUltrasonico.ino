@@ -19,10 +19,13 @@ void setup() {
 
 void loop() {
   avanzar();
-  leerDistancia(); // cambia de leerColor() a distancia
-  transicion();
+  leerDistancia();
+  if (letra != 'd') {
+    transicion();
+  }
   delay(1000);
 }
+
 
 void avanzar() {
   analogWrite(RPWM, 100);
@@ -49,28 +52,37 @@ void leerDistancia() {
   digitalWrite(trigPin, LOW);
 
   duracion = pulseIn(echoPin, HIGH);
-  distancia = duracion * 0.034 / 2*10; // mm
+  distancia = duracion * 0.034 / 2 * 10; // mm
 
   Serial.print("Distancia: ");
   Serial.print(distancia);
   Serial.println(" mm");
 
+  // Si está fuera del rango válido, no detecta símbolo
+    if (distancia > 95) {
+    letra = 'd'; // no reconoce nada
+    Serial.println("Muy lejos, no se detecta símbolo");
+    avanzar();
+    // return; salir de la función
+  }
+
   letra = 'd'; // valor por defecto
 
-  if (distancia < 10) {
-    letra = 'a'; // negro (cercano)
-  } else if (distancia >= 10 && distancia <= 20) {
-    letra = 'b'; // azul (medio)
-  } else if (distancia > 30) {
-    letra = 'c'; // rosa (lejano)
+  if (distancia < 40) {
+    letra = 'c'; // negro (muy cerca)
+  } else if (distancia >= 40 && distancia <= 60) {
+    letra = 'a'; // azul (medio)
+  } else if (distancia > 60 && distancia <= 90) {
+    letra = 'b'; // rosa (lejano, pero dentro del rango)
   }
 
   if (letra != 'd') {
     Serial.println("Símbolo leído: " + String(letra));
   } else {
-    Serial.println("Distancia fuera de rango válido");
+    Serial.println("Distancia dentro del rango, pero sin símbolo válido");
   }
 }
+
 
 void transicion() {
   Serial.println("Estado: " + estado);
