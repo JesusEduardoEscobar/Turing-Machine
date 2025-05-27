@@ -1,122 +1,178 @@
-int RPWM = 5;
-int LPWM = 6;
+const int RPWM = 5;
+const int LPWM = 6;
+const int trigPin = 10;
+const int echoPin = 11;
 
-const int trigPin = 10;  // Nuevo pin TRIG
-const int echoPin = 11;  // Nuevo pin ECHO
+// Constantes de distancia en mm
+const int DIST_CERCANA = 40;
+const int DIST_MEDIA = 60;
+const int DIST_LEJANA = 90;
 
-char letra = 'd'; // Último símbolo leído
-String estado = "q0"; // Estado inicial
+// Configuración de movimiento
+const int VELOCIDAD = 120;
+const int DURACION_AVANCE = 1200;
+const int DURACION_RETROCESO = 1000;
+
+// Variables del sistema
+char letra = 'd';
+String estado = "q0";
+unsigned long tiempoInicioMovimiento = 0;
+bool enMovimiento = false;
 
 void setup() {
   Serial.begin(9600);
   pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  pinMode(echoPin, INPUT);  
   pinMode(RPWM, OUTPUT);
   pinMode(LPWM, OUTPUT);
-
-  Serial.println("Estado: " + estado);
+  
+  analogWrite(RPWM, 0);
+  analogWrite(LPWM, 0);
 }
 
 void loop() {
-  avanzar();
-  leerDistancia();
-  if (letra != 'd') {
-    transicion();
+  if (!enMovimiento) {
+    leerDistancia();
+    
+    if (letra != 'd') {
+      transicion();
+    }
+    delay(100);
+  } else {
+    if ((estado == "q1" || estado == "q2" || estado == "q5") && (millis() - tiempoInicioMovimiento >= DURACION_AVANCE)) {
+      detener();
+      enMovimiento = false;
+    } 
+    else if ((estado == "q3" || estado == "q4") && (millis() - tiempoInicioMovimiento >= DURACION_RETROCESO)) {
+      detener();
+      enMovimiento = false;
+    }
   }
-  delay(1000);
 }
 
-
+// Funciones de movimiento
 void avanzar() {
-  analogWrite(RPWM, 100);
+  analogWrite(RPWM, VELOCIDAD);
   analogWrite(LPWM, 0);
-  delay(1000);
-  analogWrite(RPWM, 0);
+  tiempoInicioMovimiento = millis();
+  enMovimiento = true;
 }
 
 void retroceder() {
-  analogWrite(LPWM, 100);
+  analogWrite(LPWM, VELOCIDAD);
   analogWrite(RPWM, 0);
-  delay(1000);
+  tiempoInicioMovimiento = millis();
+  enMovimiento = true;
+}
+
+void detener() {
+  analogWrite(RPWM, 0);
   analogWrite(LPWM, 0);
 }
 
+// Función del sensor simplificada
 void leerDistancia() {
-  long duracion;
-  float distancia;
-
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  duracion = pulseIn(echoPin, HIGH);
-  distancia = duracion * 0.034 / 2 * 10; // mm
+  long duracion = pulseIn(echoPin, HIGH, 30000);
+  float distancia = duracion * 0.034 / 2 * 10;
 
+  // Solo imprimir distancia
   Serial.print("Distancia: ");
   Serial.print(distancia);
   Serial.println(" mm");
 
-  // Si está fuera del rango válido, no detecta símbolo
-    if (distancia > 95) {
-    letra = 'd'; // no reconoce nada
-    Serial.println("Muy lejos, no se detecta símbolo");
-    avanzar();
-    // return; salir de la función
+  letra = 'd';
+  
+  if (distancia > 95) {
+    letra = 'd';
+    return;
   }
 
-  letra = 'd'; // valor por defecto
-
-  if (distancia < 40) {
-    letra = 'c'; // negro (muy cerca)
-  } else if (distancia >= 40 && distancia <= 60) {
-    letra = 'a'; // azul (medio)
-  } else if (distancia > 60 && distancia <= 90) {
-    letra = 'b'; // rosa (lejano, pero dentro del rango)
+  if (distancia > 2 && distancia < DIST_CERCANA) {
+    letra = 'c';
+  } else if (distancia >= DIST_CERCANA && distancia <= DIST_MEDIA) {
+    letra = 'a';
+  } else if (distancia > DIST_MEDIA && distancia <= DIST_LEJANA) {
+    letra = 'b';
   }
 
   if (letra != 'd') {
-    Serial.println("Símbolo leído: " + String(letra));
-  } else {
-    Serial.println("Distancia dentro del rango, pero sin símbolo válido");
+    Serial.print("Símbolo: ");
+    Serial.println(letra);
   }
 }
 
-
+// Máquina de estados simplificada
 void transicion() {
-  Serial.println("Estado: " + estado);
+  Serial.print("Estado: ");
+  Serial.print(estado);
+  Serial.print(" -> ");
+  
   if (estado == "q0") {
     if (letra == 'c') {
       estado = "q1";
+      avanzar();
     } else if (letra == 'a' || letra == 'b') {
       estado = "q_dead";
     }
   } else if (estado == "q1") {
     if (letra == 'a') {
       estado = "q2";
-    } else {
+      avanzar();
+    } else if(letra == 'b' || letra == 'c') {
       estado = "q_dead";
     }
   } else if (estado == "q2") {
     if (letra == 'a' || letra == 'b') {
       estado = "q2";
+      avanzar();
     } else if (letra == 'c') {
-      estado = "q_accept";
-    } else {
+      estado = "q3";
+      retroceder();
+    } 
+  } else if (estado == "q3") {
+    if (letra == 'b'){
+      estado = "q4";
+      retroceder();
+    }
+    else if (letra == 'a' || letra == 'c') {
+      estado= "q_dead";
+    }
+  } else if(estado == "q4"){
+    if( letra == 'a'){
+      estado = "q5";
+      avanzar();
+    }
+    else if (letra == 'b' || letra== 'c'){
       estado = "q_dead";
     }
-  } else if (estado == "q_accept") {
-    estado = "q_final";
-  } else if (estado == "q_final") {
-    Serial.println("Palabra aceptada.");
-    analogWrite(RPWM, 0);
-    analogWrite(LPWM, 0);
-    while (true);
-  } else if (estado == "q_dead") {
-    Serial.println("Palabra inválida. Estado de muerte alcanzado.");
-    analogWrite(RPWM, 0);
-    analogWrite(LPWM, 0);
-    while (true);
+  } else if(estado == "q5" ) {
+    if(letra == 'b' ) {
+      avanzar();
+      estado = "q_final";
+    }
+    else if( letra == 'a' || letra == 'c') {
+      estado = "q_dead";
+    }
   }
+  
+  Serial.println(estado);
+  
+  if (estado == "q_final") {
+    Serial.println("Aceptado");
+    finalizarPrograma();
+  } else if (estado == "q_dead") {
+    Serial.println("Rechazado");
+    finalizarPrograma();
+  }
+}
+
+void finalizarPrograma() {
+  detener();
+  while(true);
 }
