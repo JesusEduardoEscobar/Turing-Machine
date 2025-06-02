@@ -5,13 +5,13 @@ const int echoPin = 11;
 
 // Constantes de distancia en mm
 const int DIST_CERCANA = 40;
-const int DIST_MEDIA = 60;
+const int DIST_MEDIA = 55;
 const int DIST_LEJANA = 90;
 
 // Configuración de movimiento
 const int VELOCIDAD = 120;
 const int DURACION_AVANCE = 1200;
-const int DURACION_RETROCESO = 1000;
+const int DURACION_RETROCESO = 1200;
 
 // Variables del sistema
 char letra = 'd';
