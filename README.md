@@ -26,26 +26,50 @@ This project implements a physical/embedded simulation of a Turing Machine conce
 
 ---
 
-## Hardware (suggested / example)
+## Materials
 
-> **⚠️ Replace the pin numbers and components below with the actual values used in `turinUltrasonico.ino`.**
+To replicate this project, you will need:
 
-- Arduino UNO (or compatible)
-- Ultrasonic distance sensor (HC-SR04 or similar)
-  - VCC -> 5V
-  - GND -> GND
-  - TRIG -> Arduino pin `X` (replace)
-  - ECHO -> Arduino pin `Y` (replace)
-- (Optional) Servo / DC motor / LEDs to indicate head movement and state transitions
-  - Servo signal -> Arduino pin `Z` (replace)
-- Wires, breadboard, power supply
+- **1x Arduino Uno**
+- **1x Arduino UNO** (or compatible board)
+- **1x Ultrasonic distance sensor** (e.g., HC-SR04)
+- **1x Breadboard**
+- **6x strcutures that can be placed at different distances to calculate distances and input them**
+- **1x Servo motor reducer**
+- **1x H-bridge**
+- **1x MDF wood (Turing machine frame)**
+- **Glue**
+- **4x Ball bearing**
+- Paper for the conveyor belt**
+- **1x 12V power supply**
+- **Jumper wires** (male-to-male)
+- **USB cable** to connect Arduino to your computer
+
+---
+
+## Hardware setup
+
+> ⚠️ Replace pin numbers according to `turinUltrasonico.ino`.
+
+- Ultrasonic sensor connections:
+  - VCC → 5V  
+  - GND → GND  
+  - TRIG → Arduino pin `X`  
+  - ECHO → Arduino pin `Y`  
+
+- Servo motor / LED connections (optional):
+  - Servo signal → Arduino pin `Z`  
+  - LED anode → Digital pin `N` (through resistor)  
+  - LED cathode → GND  
 
 ---
 
 ## Software / Dependencies
 
-- Arduino IDE (version recommended: latest stable)
-- No external libraries required unless the sketch uses them (check top of `turinUltrasonico.ino`). If the project uses libraries (e.g., `Servo.h`), install them via the Arduino Library Manager.
+- Arduino IDE (latest stable version recommended)
+- Required libraries:
+  - `Servo.h` *(if used in the sketch)*  
+  - No additional libraries unless specified at the top of `turinUltrasonico.ino`.
 
 ---
 
@@ -63,26 +87,16 @@ This project implements a physical/embedded simulation of a Turing Machine conce
 
 ## How the model maps to a Turing Machine (conceptual)
 
-- **Tape:** Represented by a sequence of sensor readings (e.g., distance ranges → symbols).
-- **Head:** The sensor/reading point that "reads" the current symbol.
-- **States:** Internal variables in the sketch representing the Turing Machine states.
-- **Transition function:** Implemented as conditional logic (if/else or `switch`) that, given the current state and read symbol, decides the next state, the action (write/move), and any actuator commands (LEDs/servo).
-
----
-
-## Examples / Demo
-
-- Short demonstration video (if available): *link or embed here*  
-- Example inputs and expected behavior:
-  - `distance < 10 cm` → symbol `A`
-  - `10 cm <= distance < 20 cm` → symbol `B`
-  - (Add actual mapping used in the sketch)
+- **Tape:** Sequence of sensor readings (distance ranges → symbols).  
+- **Head:** The sensor/reading point that "reads" the current symbol.  
+- **States:** Internal variables in the sketch representing the Turing Machine states.  
+- **Transition function:** Conditional logic (if/else or `switch`) that, given the current state and read symbol, decides the next state, the action (write/move), and any actuator commands (LEDs/servo).  
 
 ---
 
 ## Team & Course
 
-- **Team:** Jesús Eduardo Escobar, Ángel Gabriel Camacho Pérez, Ivana Banderas  
+- **Team:** Jesús Eduardo Escobar, Ángel Gabriel Camacho Pérez, Ivana Banderas Elliot 
 - **Course:** *Implementation of Computational Methods* — ITC, Tecnológico de Monterrey (4th semester)
 
 ---
