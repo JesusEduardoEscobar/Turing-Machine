@@ -113,4 +113,10 @@ To replicate this project, you will need:
 ## License
 
 Specify your license (e.g., MIT, GPL-3.0). Example:
+MIT License
+© 2025 Jesús Eduardo Escobar
 
+## Contact
+
+If you want to replicate or improve this project, open an issue or contact me via GitHub:  
+👉 [GitHub Profile](https://github.com/JesusEduardoEscobar)
