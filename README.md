@@ -112,7 +112,7 @@ To replicate this project, you will need:
 
 ## License
 
-Specify your license (e.g., MIT, GPL-3.0). Example:
+Specify your license (e.g., MIT, GPL-3.0).
 MIT License
 © 2025 Jesús Eduardo Escobar
 
